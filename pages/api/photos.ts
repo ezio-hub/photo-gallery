@@ -26,19 +26,20 @@ const photos: Photo[] = Array.from({ length: 27 }, (_, i) => ({
   comments: Math.floor(Math.random() * 100), 
 }));
 
-export default function handler(
+export async function getUserAndPhotos(page: number) {
+  const perPage = 9;
+  const startIndex = (page - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  
+  const photosToSend = photos.slice(startIndex, endIndex);
+  return { user, photos: photosToSend };
+}
+
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ user: User; photos: Photo[] }>
 ) {
   const page = req.query.page ? parseInt(req.query.page as string) : 1;
-  const perPage = 9;
-  const startIndex = (page - 1) * perPage;
-  const endIndex = startIndex + perPage;
-
-  console.log('startIndex', startIndex);
-  console.log('endIndex', endIndex);
-  
-  const photosToSend = photos.slice(startIndex, endIndex);
-
-  res.status(200).json({ user, photos: photosToSend });
+  const data = await getUserAndPhotos(page);
+  res.status(200).json(data);
 }
